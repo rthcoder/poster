@@ -4,6 +4,11 @@ import { PrismaService } from '@prisma'
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async findAll() {
+    const users = await this.prisma.users.findMany()
+    return users
+  }
   async validate(data: any) {
     const user = await this.prisma.users.findFirst({
       where: {
