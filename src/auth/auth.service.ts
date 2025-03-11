@@ -1,5 +1,5 @@
 import { LoginRequest, LoginResponse } from '@interfaces'
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
+import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { PrismaService } from 'prisma/prisma.service'
 import * as bcrypt from 'bcrypt'
 import { UsersService } from '@modules'
@@ -16,8 +16,6 @@ export class AuthService {
 
   async login(data: LoginRequest): Promise<LoginResponse> {
     const user = await this.usersService.validate({ login: data.login })
-
-    let refreshToken: string
 
     const isMatch = await bcrypt.compare(data.password, user.password)
 

@@ -20,7 +20,8 @@
       "@client": ["./client"],
       "@guards": ["./guards"],
       "@prisma": ["./prisma"],
-      "@sqlquery": ["./sql"]
+      "@sqlquery": ["./sql"],
+      "@auth": ["./auth"]
     },
     "typeRoots": ["./node_modules/@types", "./srs/types"],
     "strict": true,

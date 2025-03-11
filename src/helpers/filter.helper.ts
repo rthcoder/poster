@@ -14,7 +14,7 @@ export class FilterService {
     const query: any = {
       where: {
         deletedAt: {
-          equal: null,
+          equals: null,
         },
       },
       include: {},
@@ -95,7 +95,11 @@ export class FilterService {
     modelName: keyof Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'>,
     filters: Array<{ column: string; operator: string; value: any }>,
   ): Promise<number> {
-    const where: any = {}
+    const where: any = {
+      deletedAt: {
+        equals: null,
+      },
+    }
 
     const fieldMapping: Record<string, string> = {
       code: 'user.code',
@@ -115,7 +119,7 @@ export class FilterService {
 
       switch (filter.operator) {
         case 'equals':
-        case 'equal': // 🔥 "equal" ham ishlashi uchun
+        case 'equal':
           valueCondition = { equals: filter.value }
           break
         case 'contains':

@@ -1,9 +1,8 @@
-// eslint.config.js
-const prettierPlugin = require('eslint-plugin-prettier');
-const typescriptPlugin = require('@typescript-eslint/eslint-plugin');
-const typescriptParser = require('@typescript-eslint/parser');
+import prettierPlugin from 'eslint-plugin-prettier'
+import typescriptPlugin from '@typescript-eslint/eslint-plugin'
+import typescriptParser from '@typescript-eslint/parser'
 
-module.exports = [
+export default [
   {
     files: ['**/*.{js,ts}'],
     ignores: [
@@ -28,14 +27,14 @@ module.exports = [
       },
     },
     plugins: {
-      prettier: prettierPlugin,
-      '@typescript-eslint': typescriptPlugin, // <-- TypeScript plagini ulash
+      'prettier': prettierPlugin,
+      '@typescript-eslint': typescriptPlugin,
     },
     rules: {
-      semi: 'off',
+      'semi': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': 'warn',
       'prettier/prettier': 'error',
     },
   },
-];
+]

@@ -1,26 +1,26 @@
-import { Injectable } from '@nestjs/common';
-import { CreateBranchDto } from './dto/create-branch.dto';
-import { UpdateBranchDto } from './dto/update-branch.dto';
+import { Injectable } from '@nestjs/common'
+import { CreateBranchDto } from './dto/create-branch.dto'
+import { UpdateBranchDto } from './dto/update-branch.dto'
 
 @Injectable()
 export class BranchesService {
   create(createBranchDto: CreateBranchDto) {
-    return 'This action adds a new branch';
+    return 'This action adds a new branch'
   }
 
   findAll() {
-    return `This action returns all branches`;
+    return `This action returns all branches`
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} branch`;
+    return `This action returns a #${id} branch`
   }
 
   update(id: number, updateBranchDto: UpdateBranchDto) {
-    return `This action updates a #${id} branch`;
+    return `This action updates a #${id} branch`
   }
 
   remove(id: number) {
-    return `This action removes a #${id} branch`;
+    return `This action removes a #${id} branch`
   }
 }
