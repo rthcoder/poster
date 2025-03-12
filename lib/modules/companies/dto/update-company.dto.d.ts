@@ -1,4 +1,5 @@
-import { CreateCompanyRequest } from '@interfaces';
-export declare class UpdateCompanyDto implements CreateCompanyRequest {
-    name: string;
+import { CreateCompanyDto } from './create-company.dto';
+declare const UpdateCompanyDto_base: import("@nestjs/common").Type<Partial<CreateCompanyDto>>;
+export declare class UpdateCompanyDto extends UpdateCompanyDto_base {
 }
+export {};

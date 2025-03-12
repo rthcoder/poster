@@ -1,5 +1,4 @@
-import { CreateRegionDto } from './create-region.dto';
-declare const UpdateRegionDto_base: import("@nestjs/common").Type<Partial<CreateRegionDto>>;
-export declare class UpdateRegionDto extends UpdateRegionDto_base {
+import { UpdateRegionRequest } from '@interfaces';
+export declare class UpdateRegionDto implements UpdateRegionRequest {
+    name: string;
 }
-export {};

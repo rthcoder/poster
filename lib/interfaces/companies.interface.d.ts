@@ -2,7 +2,7 @@ import { Branch, Pagination } from '@interfaces';
 export interface Company {
     id: number;
     name: string;
-    branches: Branch[];
+    branches?: Branch[];
     createdAt: Date;
 }
 export interface FindCompanyResponse {

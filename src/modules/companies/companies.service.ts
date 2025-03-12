@@ -2,151 +2,102 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { CreateCompanyDto } from './dto/create-company.dto'
 import { UpdateCompanyDto } from './dto/update-company.dto'
 import { PrismaService } from '@prisma'
-import { HttpStatus, Pagination } from '@enums'
-import { FilterService, formatResponse, paginationResponse } from '@helpers'
-import {
-  Company,
-  CreateCompanyRequest,
-  FindCompanyResponse,
-  NoContentResponse,
-  UpdateCompanyRequest,
-} from '@interfaces'
+import { equal } from 'assert'
+import { HttpStatus, UserRoles } from '@enums'
+import { formatResponse } from '@helpers'
+import * as bcrypt from 'bcrypt'
+import { saltOrRounds } from '@constants'
 
 @Injectable()
 export class CompaniesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(query: any): Promise<FindCompanyResponse> {
-    const { limit = Pagination.LIMIT, page = Pagination.PAGE, sort, filters } = query
-
-    const parsedSort = sort ? JSON?.parse(sort) : {}
-
-    const parsedFilters = filters ? JSON?.parse(filters) : []
-
-    const companies = await FilterService?.applyFilters(
-      'company',
-      parsedFilters,
-      parsedSort,
-      Number(limit),
-      Number(page),
-      ['branch'],
-    )
-
-    const count: number = await FilterService.countRecords('company', parsedFilters)
-
-    const result: Company[] = []
-
-    companies.map((company: Company) => {
-      result.push({
-        id: company?.id,
-        name: company.name,
-        branches: company.branches,
-        createdAt: company.createdAt,
-      })
+  async findAll() {
+    const companies = await this.prisma.users.findMany({
+      where: {
+        deletedAt: {
+          equals: null,
+        },
+        roleId: UserRoles.COMPANY,
+      },
+      select: {
+        id: true,
+        name: true,
+        createdAt: true,
+      },
     })
-
-    const pagination = paginationResponse(count, Pagination.LIMIT, Pagination.PAGE)
-    return formatResponse<Company[]>(HttpStatus.OK, result, pagination)
+    return formatResponse(HttpStatus.OK, companies)
   }
 
-  async findOne(id: number): Promise<FindCompanyResponse> {
-    const company: Company = await this.prisma.company.findUnique({
+  async findOne(id: number) {
+    const company = await this.prisma.users.findUnique({
       where: {
         id: id,
         deletedAt: {
           equals: null,
         },
+        roleId: UserRoles.COMPANY,
       },
       select: {
         id: true,
         name: true,
-        branches: true,
         createdAt: true,
       },
     })
 
     if (!company) {
-      throw new NotFoundException('Компания с таким идентификатором не найдена!')
+      throw new NotFoundException()
     }
-
-    return formatResponse<Company>(HttpStatus.OK, company)
+    return formatResponse(HttpStatus.OK, company)
   }
 
-  async create(data: CreateCompanyRequest) {
-    const newComany = await this.prisma.company.create({
+  async create(data: any) {
+    const hashedPassword = await bcrypt.hash(data.password, saltOrRounds)
+    const newCompany = this.prisma.users.create({
       data: {
-        name: data.name,
+        roleId: UserRoles.COMPANY,
+        password: hashedPassword,
+        ...data,
       },
       select: {
         id: true,
         name: true,
-        branches: true,
         createdAt: true,
       },
     })
-
-    console.log(newComany)
-
-    return formatResponse<Company>(HttpStatus.CREATED, newComany)
+    return formatResponse(HttpStatus.OK, newCompany)
   }
 
-  async update(id: number, data: UpdateCompanyRequest): Promise<FindCompanyResponse> {
-    const company = await this.prisma.company.findUnique({
+  update(id: number, updateCompanyDto: UpdateCompanyDto) {
+    return `This action updates a #${id} company`
+  }
+
+  async remove(id: number) {
+    const company = await this.prisma.users.findUnique({
       where: {
+        id: id,
         deletedAt: {
           equals: null,
         },
-        id: id,
+        roleId: UserRoles.COMPANY,
       },
     })
 
     if (!company) {
-      throw new NotFoundException('Компания с таким идентификатором не найдена!')
+      throw new NotFoundException()
     }
 
-    const updatedCompany: Company = await this.prisma.company.update({
+    await this.prisma.users.update({
       where: {
         id: id,
+        roleId: UserRoles.COMPANY,
         deletedAt: {
           equals: null,
         },
       },
       data: {
-        name: data.name,
-      },
-      select: {
-        id: true,
-        name: true,
-        branches: true,
-        createdAt: true,
+        updatedAt: new Date(),
       },
     })
-
-    return formatResponse<Company>(HttpStatus.OK, updatedCompany)
-  }
-
-  async remove(id: number): Promise<NoContentResponse> {
-    const company = await this.prisma.company.findUnique({
-      where: {
-        id: id,
-        deletedAt: {
-          equals: null,
-        },
-      },
-    })
-
-    if (!company) {
-      throw new NotFoundException('Компания с таким идентификатором не найдена!')
-    }
-
-    await this.prisma.company.delete({
-      where: {
-        id: id,
-      },
-    })
-
-    return {
-      status: HttpStatus.NO_CONTENT,
-    }
   }
 }

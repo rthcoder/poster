@@ -1,19 +1,10 @@
+import { NoContentResponse, User } from '@interfaces';
 import { PrismaService } from '@prisma';
 export declare class UsersService {
     private readonly prisma;
     constructor(prisma: PrismaService);
-    findAll(): Promise<{
-        id: number;
-        name: string | null;
-        login: string;
-        password: string;
-        roleId: number;
-        companyId: number | null;
-        branchId: number | null;
-        createdAt: Date;
-        updatedAt: Date | null;
-        deletedAt: Date | null;
-    }[]>;
+    findAll(query: any): Promise<import("@interfaces").Response<User[]>>;
+    remove(id: number): Promise<NoContentResponse>;
     validate(data: any): Promise<{
         id: number;
         login: string;

@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt'
 import { UsersService } from '@modules'
 import { signJwt } from '@helpers'
 import { jwtConstants } from '@constants'
+import { UserRoles } from '@enums'
 
 @Injectable()
 export class AuthService {
@@ -37,6 +38,7 @@ export class AuthService {
       {
         id: user?.id,
         login: user?.login,
+        role: user.role,
       },
       jwtConstants.accessSecret,
       60 * 60 * 24 * 15,

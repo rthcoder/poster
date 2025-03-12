@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -16,7 +10,6 @@ datasource db {
 model UserRoles {
   id        Int       @id @default(autoincrement())
   name      String    @unique
-  int       Int?      @unique
   users     Users[]
 
   createdAt DateTime  @default(now()) @map("created_at")
@@ -44,12 +37,14 @@ model Users {
   login      String    @unique
   password   String
   roleId     Int       @map("role_id")
-  companyId  Int?      @map("company_id")
   branchId   Int?      @map("branch_id")
+  companyId  Int?      @map("company_id")
 
   role       UserRoles @relation(fields: [roleId], references: [id])
-  company    Company?  @relation(fields: [companyId], references: [id], onDelete: SetNull)
-  branch     Branch?   @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  branch     Branch?   @relation(name: "BranchToUsers", fields: [branchId], references: [id], onDelete: SetNull)
+  company    Users?    @relation(name: "CompanyToUsers", fields: [companyId], references: [id], onDelete: SetNull)
+  branches   Branch[]  @relation(name: "CompanyToBranch")
+  employees  Users[]   @relation(name: "CompanyToUsers")
 
   createdAt  DateTime  @default(now()) @map("created_at")
   updatedAt  DateTime? @updatedAt @map("updated_at")
@@ -58,28 +53,15 @@ model Users {
   @@map("user")
 }
 
-model Company {
-  id        Int       @id @default(autoincrement())
-  name      String
-  branches  Branch[]
-  users     Users[]
-
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime? @updatedAt @map("updated_at")
-  deletedAt DateTime? @map("deleted_at")
-
-  @@map("company")
-}
-
 model Branch {
   id         Int       @id @default(autoincrement())
   name       String
-  companyId  Int?      @map("company_id")
   regionId   Int?      @map("region_id")
+  companyId  Int       @map("company_id")
 
-  company    Company?  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   region     Region?   @relation(fields: [regionId], references: [id], onDelete: Cascade)
-  users      Users[]
+  company    Users     @relation(name: "CompanyToBranch", fields: [companyId], references: [id], onDelete: Cascade)
+  users      Users[]   @relation(name: "BranchToUsers")
 
   createdAt  DateTime  @default(now()) @map("created_at")
   updatedAt  DateTime? @updatedAt @map("updated_at")

@@ -1,4 +1,7 @@
 export enum UserRoles {
-  CASSA = 1,
-  SUPER_ADMIN = 3,
+  SUPER_ADMIN = 1,
+  MANAGER = 2,
+  COMPANY = 3,
+  BRANCH = 4,
+  KASSA = 5,
 }

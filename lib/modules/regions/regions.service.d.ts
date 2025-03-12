@@ -1,9 +1,12 @@
 import { CreateRegionDto } from './dto/create-region.dto';
-import { UpdateRegionDto } from './dto/update-region.dto';
+import { FindRegionResponse, NoContentResponse, UpdateRegionRequest } from '@interfaces';
+import { PrismaService } from '@prisma';
 export declare class RegionsService {
+    private readonly prisma;
+    constructor(prisma: PrismaService);
     create(createRegionDto: CreateRegionDto): string;
-    findAll(): string;
-    findOne(id: number): string;
-    update(id: number, updateRegionDto: UpdateRegionDto): string;
-    remove(id: number): string;
+    findAll(query: any): Promise<FindRegionResponse>;
+    findOne(id: number): Promise<FindRegionResponse>;
+    update(id: number, data: UpdateRegionRequest): Promise<FindRegionResponse>;
+    remove(id: number): Promise<NoContentResponse>;
 }
