@@ -3,16 +3,12 @@ import { CreateRegionDto } from './dto/create-region.dto'
 import { UpdateRegionDto } from './dto/update-region.dto'
 import { HttpStatus, Pagination, UserRoles } from '@enums'
 import { addFilter, FilterService, formatResponse, paginationResponse } from '@helpers'
-import { FindRegionResponse, NoContentResponse, Region, UpdateRegionRequest } from '@interfaces'
+import { CreateRegionRequest, FindRegionResponse, NoContentResponse, Region, UpdateRegionRequest } from '@interfaces'
 import { PrismaService } from '@prisma'
 
 @Injectable()
 export class RegionsService {
   constructor(private readonly prisma: PrismaService) {}
-  create(createRegionDto: CreateRegionDto) {
-    return 'This action adds a new region'
-  }
-
   async findAll(query: any): Promise<FindRegionResponse> {
     const { limit = Pagination.LIMIT, page = Pagination.PAGE, sort, filters } = query
     const parsedSort = sort ? JSON?.parse(sort) : {}
@@ -76,6 +72,21 @@ export class RegionsService {
     return formatResponse<Region>(HttpStatus.OK, region)
   }
 
+  async create(data: CreateRegionRequest): Promise<FindRegionResponse> {
+    const newRegion = await this.prisma.region.create({
+      data: {
+        name: data.name,
+      },
+      select: {
+        id: true,
+        name: true,
+        createdAt: true,
+      },
+    })
+
+    return formatResponse<Region>(HttpStatus.CREATED, newRegion)
+  }
+
   async update(id: number, data: UpdateRegionRequest): Promise<FindRegionResponse> {
     const region = await this.prisma.region.findUnique({
       where: {
@@ -104,7 +115,6 @@ export class RegionsService {
       select: {
         id: true,
         name: true,
-        branches: true,
         createdAt: true,
       },
     })

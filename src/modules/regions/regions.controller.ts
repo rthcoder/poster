@@ -2,7 +2,6 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { RegionsService } from './regions.service'
 import { CreateRegionDto } from './dto/create-region.dto'
 import { UpdateRegionDto } from './dto/update-region.dto'
-import { UpdateRegionRequest } from '@interfaces'
 import { ApiTags } from '@nestjs/swagger'
 import { ApiVersion } from '@enums'
 
@@ -30,7 +29,7 @@ export class RegionsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRegionDto: UpdateRegionRequest) {
+  update(@Param('id') id: string, @Body() updateRegionDto: UpdateRegionDto) {
     return this.regionsService.update(+id, updateRegionDto)
   }
 

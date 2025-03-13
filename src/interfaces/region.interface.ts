@@ -3,7 +3,7 @@ import { Branch, Pagination } from '@interfaces'
 export interface Region {
   id: number
   name: string
-  branches: Branch[]
+  branches?: Branch[]
   createdAt: Date
 }
 
