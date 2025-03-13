@@ -12,12 +12,6 @@ import { ApiVersion } from '@enums'
 })
 export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) {}
-
-  @Post()
-  create(@Body() createCompanyDto: CreateCompanyDto) {
-    return this.companiesService.create(createCompanyDto)
-  }
-
   @Get()
   findAll() {
     return this.companiesService.findAll()
@@ -26,6 +20,11 @@ export class CompaniesController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.companiesService.findOne(+id)
+  }
+
+  @Post()
+  create(@Body() createCompanyDto: CreateCompanyDto) {
+    return this.companiesService.create(createCompanyDto)
   }
 
   @Patch(':id')

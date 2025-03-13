@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { PrismaService } from '@prisma'
 import { HttpStatus, Pagination, UserRoles } from '@enums'
 import { FilterService, formatResponse, paginationResponse } from '@helpers'
-import { Branch, CreateBranchRequest } from '@interfaces'
+import { Branch, CreateBranchRequest, NoContentResponse, UpdateBranchRequest } from '@interfaces'
 
 @Injectable()
 export class BranchesService {
@@ -111,7 +111,7 @@ export class BranchesService {
     return formatResponse(HttpStatus.CREATED, newBranch)
   }
 
-  async update(id: number, data: any) {
+  async update(id: number, data: UpdateBranchRequest) {
     const branch = await this.prisma.branch.findUnique({
       where: {
         id: id,
@@ -121,7 +121,7 @@ export class BranchesService {
       },
     })
     if (!branch) {
-      throw new NotFoundException('branch not found')
+      throw new NotFoundException('Филиал с указанным идентификатором не найден!')
     }
 
     const updatedBranch = await this.prisma.branch.update({
@@ -129,8 +129,8 @@ export class BranchesService {
         id: id,
       },
       data: {
+        name: data?.name,
         updatedAt: new Date(),
-        ...data,
       },
       select: {
         id: true,
@@ -153,10 +153,10 @@ export class BranchesService {
       },
     })
 
-    return updatedBranch
+    return formatResponse(HttpStatus.OK, updatedBranch)
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<NoContentResponse> {
     const branch = await this.prisma.branch.findUnique({
       where: {
         id: id,
@@ -166,7 +166,7 @@ export class BranchesService {
       },
     })
     if (!branch) {
-      throw new NotFoundException('branch not found')
+      throw new NotFoundException('Филиал с указанным идентификатором не найден!')
     }
 
     await this.prisma.branch.update({
@@ -177,5 +177,8 @@ export class BranchesService {
         deletedAt: new Date(),
       },
     })
+    return {
+      status: HttpStatus.NO_CONTENT,
+    }
   }
 }

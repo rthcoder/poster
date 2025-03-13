@@ -15,8 +15,12 @@ export interface FindCompanyResponse {
 
 export interface CreateCompanyRequest {
   name: string
+  login: string
+  password: string
 }
 
 export interface UpdateCompanyRequest {
   name?: string
+  login?: string
+  password?: string
 }
