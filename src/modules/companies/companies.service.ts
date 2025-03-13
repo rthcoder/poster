@@ -30,6 +30,11 @@ export class CompaniesService {
             name: true,
             createdAt: true,
           },
+          where: {
+            deletedAt: {
+              equals: null,
+            },
+          },
         },
         createdAt: true,
       },
@@ -54,6 +59,11 @@ export class CompaniesService {
             id: true,
             name: true,
             createdAt: true,
+          },
+          where: {
+            deletedAt: {
+              equals: null,
+            },
           },
         },
         createdAt: true,
@@ -94,11 +104,12 @@ export class CompaniesService {
     }
 
     const hashedPassword = await bcrypt.hash(data.password, saltOrRounds)
-    const newCompany = this.prisma.users.create({
+    const newCompany = await this.prisma.users.create({
       data: {
         roleId: UserRoles.COMPANY,
         password: hashedPassword,
         login: data.login,
+        name: data.name,
       },
       select: {
         id: true,
@@ -106,6 +117,8 @@ export class CompaniesService {
         createdAt: true,
       },
     })
+    console.log(newCompany)
+
     return formatResponse(HttpStatus.OK, newCompany)
   }
 
@@ -157,6 +170,7 @@ export class CompaniesService {
       data: {
         login: data.login || existingUser.login,
         password: hashedPassword || existingUser.password,
+        name: data.name || existingUser.name,
       },
       select: {
         id: true,
