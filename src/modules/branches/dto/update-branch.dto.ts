@@ -1,4 +1,16 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateBranchDto } from './create-branch.dto';
+import { UpdateBranchRequest } from '@interfaces'
+import { IsNumber, IsOptional, IsString } from 'class-validator'
 
-export class UpdateBranchDto extends PartialType(CreateBranchDto) {}
+export class UpdateBranchDto implements UpdateBranchRequest {
+  @IsOptional()
+  @IsString()
+  name: string
+
+  @IsOptional()
+  @IsNumber()
+  companyId: number
+
+  @IsOptional()
+  @IsNumber()
+  regionId: number
+}

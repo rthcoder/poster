@@ -1,21 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common'
 import { BranchesService } from './branches.service'
 import { CreateBranchDto } from './dto/create-branch.dto'
 import { UpdateBranchDto } from './dto/update-branch.dto'
 import { ApiTags } from '@nestjs/swagger'
 import { ApiVersion } from '@enums'
 
-@ApiTags('Region Service')
+@ApiTags('Branch Service')
 @Controller({
   version: ApiVersion.version,
-  path: 'regions',
+  path: 'branches',
 })
 export class BranchesController {
   constructor(private readonly branchesService: BranchesService) {}
 
   @Get()
-  findAll() {
-    return this.branchesService.findAll()
+  findAll(@Query() query: any) {
+    return this.branchesService.findAll(query)
   }
 
   @Get(':id')

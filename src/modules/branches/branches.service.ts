@@ -1,23 +1,48 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { CreateBranchDto } from './dto/create-branch.dto'
-import { UpdateBranchDto } from './dto/update-branch.dto'
 import { PrismaService } from '@prisma'
-import { HttpStatus, UserRoles } from '@enums'
-import { formatResponse } from '@helpers'
+import { HttpStatus, Pagination, UserRoles } from '@enums'
+import { FilterService, formatResponse, paginationResponse } from '@helpers'
+import { Branch, CreateBranchRequest } from '@interfaces'
 
 @Injectable()
 export class BranchesService {
   constructor(private readonly prisma: PrismaService) {}
-  async findAll() {
-    const branches = await this.prisma.branch.findMany({
-      where: {
-        deletedAt: {
-          equals: null,
-        },
-      },
-    })
+  async findAll(query: any) {
+    const { limit = Pagination.LIMIT, page = Pagination.PAGE, sort, filters } = query
+    const parsedSort = sort ? JSON?.parse(sort) : {}
+    const parsedFilters = filters ? JSON?.parse(filters) : []
 
-    return formatResponse(HttpStatus.OK, branches)
+    const branches: Branch[] = await FilterService?.applyFilters(
+      'branch',
+      parsedFilters,
+      parsedSort,
+      Number(limit),
+      Number(page),
+      ['company', 'region'],
+    )
+    const count = await FilterService.countRecords('region', parsedFilters)
+
+    const result: Branch[] = []
+
+    branches?.map((branch) => {
+      result?.push({
+        id: branch?.id,
+        name: branch?.name,
+        createdAt: branch?.createdAt,
+        company: {
+          id: branch?.company?.id,
+          name: branch?.company?.name,
+          createdAt: branch?.company?.createdAt,
+        },
+        region: {
+          id: branch?.region?.id,
+          name: branch?.region?.name,
+          createdAt: branch?.region?.createdAt,
+        },
+      })
+    })
+    const pagination = paginationResponse(count, limit, page)
+    return formatResponse<Branch[]>(HttpStatus.OK, result, pagination)
   }
 
   async findOne(id: number) {
@@ -28,18 +53,39 @@ export class BranchesService {
           equals: null,
         },
       },
+      select: {
+        id: true,
+        name: true,
+        createdAt: true,
+        company: {
+          select: {
+            id: true,
+            name: true,
+            createdAt: true,
+          },
+        },
+        region: {
+          select: {
+            id: true,
+            name: true,
+            createdAt: true,
+          },
+        },
+      },
     })
     if (!branch) {
-      throw new NotFoundException('branch not found')
+      throw new NotFoundException('Филиал с указанным идентификатором не найден!')
     }
 
-    return formatResponse(HttpStatus.OK, branch)
+    return formatResponse<Branch>(HttpStatus.OK, branch)
   }
 
-  async create(data: any) {
+  async create(data: CreateBranchRequest) {
     const newBranch = await this.prisma.branch.create({
       data: {
-        ...data,
+        name: data?.name,
+        companyId: data?.companyId,
+        regionId: data?.regionId,
       },
       select: {
         id: true,
@@ -62,7 +108,7 @@ export class BranchesService {
       },
     })
 
-    return newBranch
+    return formatResponse(HttpStatus.CREATED, newBranch)
   }
 
   async update(id: number, data: any) {
