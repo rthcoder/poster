@@ -1,8 +1,9 @@
-import { Pagination } from '@interfaces'
+import { Branch, Pagination } from '@interfaces'
 
 export interface Region {
   id: number
   name: string
+  branches: Branch[]
   createdAt: Date
 }
 

@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { AuthModule } from '@auth'
 import { PrismaModule } from '@prisma'
-import { UsersModule } from '@modules'
+import { UsersModule, RegionsModule } from '@modules'
 // import { ServeStaticModule } from '@nestjs/serve-static'
 
 import { join } from 'path'
@@ -27,6 +27,7 @@ import { join } from 'path'
     UsersModule,
     AuthModule,
     PrismaModule,
+    RegionsModule,
   ],
   controllers: [],
   providers: [],

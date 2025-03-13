@@ -4,4 +4,5 @@ export enum UserRoles {
   COMPANY = 3,
   BRANCH = 4,
   KASSA = 5,
+  ROOT = 6,
 }

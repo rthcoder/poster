@@ -1,11 +1,11 @@
 import { LoginRequest, LoginResponse } from '@interfaces'
-import { Injectable, UnauthorizedException } from '@nestjs/common'
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { PrismaService } from 'prisma/prisma.service'
 import * as bcrypt from 'bcrypt'
 import { UsersService } from '@modules'
-import { signJwt } from '@helpers'
+import { formatResponse, signJwt } from '@helpers'
 import { jwtConstants } from '@constants'
-import { UserRoles } from '@enums'
+import { HttpStatus, UserRoles } from '@enums'
 
 @Injectable()
 export class AuthService {
@@ -47,5 +47,47 @@ export class AuthService {
     return {
       accessToken,
     }
+  }
+
+  async getMe(userId: number) {
+    const user = await this.prisma.users.findUnique({
+      where: {
+        id: userId,
+        deletedAt: {
+          equals: null,
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        role: {
+          select: {
+            name: true,
+            roleId: true,
+          },
+        },
+        login: true,
+        branch: {
+          select: {
+            id: true,
+            name: true,
+            createdAt: true,
+          },
+        },
+        company: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    })
+
+    if (!user) {
+      throw new NotFoundException('Пользователь с указанным идентификатором не найден!')
+    }
+    console.log(user)
+
+    return formatResponse(HttpStatus.OK, user)
   }
 }

@@ -10,6 +10,7 @@ datasource db {
 model UserRoles {
   id        Int       @id @default(autoincrement())
   name      String    @unique
+  roleId    Int? @unique @map("role_id")
   users     Users[]
 
   createdAt DateTime  @default(now()) @map("created_at")
@@ -40,7 +41,7 @@ model Users {
   branchId   Int?      @map("branch_id")
   companyId  Int?      @map("company_id")
 
-  role       UserRoles @relation(fields: [roleId], references: [id])
+  role       UserRoles @relation(fields: [roleId], references: [roleId], onDelete: SetDefault)
   branch     Branch?   @relation(name: "BranchToUsers", fields: [branchId], references: [id], onDelete: SetNull)
   company    Users?    @relation(name: "CompanyToUsers", fields: [companyId], references: [id], onDelete: SetNull)
   branches   Branch[]  @relation(name: "CompanyToBranch")

@@ -18,11 +18,33 @@ export class RegionsService {
     const parsedSort = sort ? JSON?.parse(sort) : {}
     const parsedFilters = filters ? JSON?.parse(filters) : []
 
-    const regions = await FilterService?.applyFilters('region', parsedFilters, parsedSort, Number(limit), Number(page))
+    const regions: Region[] = await FilterService?.applyFilters(
+      'region',
+      parsedFilters,
+      parsedSort,
+      Number(limit),
+      Number(page),
+      ['branches'],
+    )
     const count = await FilterService.countRecords('region', parsedFilters)
 
+    const result: Region[] = []
+
+    regions?.map((region) => {
+      result.push({
+        id: region?.id,
+        name: region?.name,
+        branches: region?.branches?.map((branch) => ({
+          id: branch?.id,
+          name: branch?.name,
+          createdAt: branch?.createdAt,
+        })),
+        createdAt: region?.createdAt,
+      })
+    })
+
     const pagination = paginationResponse(count, limit, page)
-    return formatResponse<Region[]>(HttpStatus.OK, regions, pagination)
+    return formatResponse<Region[]>(HttpStatus.OK, result, pagination)
   }
 
   async findOne(id: number): Promise<FindRegionResponse> {
@@ -37,7 +59,13 @@ export class RegionsService {
         id: true,
         name: true,
         createdAt: true,
-        branches: true,
+        branches: {
+          select: {
+            id: true,
+            name: true,
+            createdAt: true,
+          },
+        },
       },
     })
 
