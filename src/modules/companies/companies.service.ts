@@ -248,13 +248,18 @@ export class CompaniesService {
       throw new ConflictException('Этот логин уже используется!')
     }
 
-    const branchExists = await this.prisma.branch.findFirst({
+    const hashedPassword = await bcrypt.hash(data.password, saltOrRounds)
+
+    const branchExists = await this.prisma.branch.findUnique({
       where: {
         id: data?.branchId,
+        deletedAt: {
+          equals: null,
+        },
       },
     })
 
-    if (branchExists) {
+    if (!branchExists) {
       throw new ConflictException('Филиал не существует!')
     }
 
@@ -262,7 +267,7 @@ export class CompaniesService {
       data: {
         name: data.name,
         login: data.login,
-        password: data.password,
+        password: hashedPassword,
         branchId: data.branchId,
         roleId: data.role,
         companyId: companyId,
@@ -297,5 +302,27 @@ export class CompaniesService {
     return formatResponse(HttpStatus.CREATED, newUser)
   }
 
-  async getStaticStaff(companyId: number) {}
+  async getStaticStaff(companyId: number) {
+    const staffs = await this.prisma.users.findMany({
+      where: {
+        roleId: {
+          in: [UserRoles.SUPER_ADMIN, UserRoles.MANAGER, UserRoles.KASSA],
+        },
+        companyId: companyId,
+      },
+
+      select: {
+        id: true,
+        name: true,
+        role: {
+          select: {
+            name: true,
+            roleId: true,
+          },
+        },
+      },
+    })
+
+    return formatResponse(HttpStatus.OK, staffs)
+  }
 }

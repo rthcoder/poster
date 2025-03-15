@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req } from '@nestjs/common'
 import { UsersService } from './users.service'
 import { ApiTags } from '@nestjs/swagger'
 import { ApiVersion } from '@enums'
 import { CreateUserDto, UpdateUserDto } from './dto'
+import { CustomRequest } from 'custom/request.custom'
 
 @ApiTags('Users Service')
 @Controller({
@@ -15,6 +16,12 @@ export class UsersController {
   @Get()
   findAll(@Query() query: any) {
     const result = this.usersService.findAll(query)
+    return result
+  }
+
+  @Get()
+  updateUser(@Body() UpdateUserDto: UpdateUserDto, @Req() request: CustomRequest) {
+    const result = this.usersService.update(UpdateUserDto, request.user.id)
     return result
   }
 

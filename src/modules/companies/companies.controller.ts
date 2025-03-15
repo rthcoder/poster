@@ -41,8 +41,14 @@ export class CompaniesController {
   }
 
   @UseGuards(CheckTokenGuard)
-  @Post(':id')
+  @Post('add-staff')
   addStaff(@Body() data: CreateUserDto, @Req() request: CustomRequest) {
     return this.companiesService.addStaff(data, request.user.companyId)
+  }
+
+  @UseGuards(CheckTokenGuard)
+  @Post('static-staffs')
+  getStaff(@Req() request: CustomRequest) {
+    return this.companiesService.getStaticStaff(request.user.companyId)
   }
 }

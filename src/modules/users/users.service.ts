@@ -2,7 +2,14 @@ import { saltOrRounds } from '@constants'
 import { HttpStatus, Pagination, UserRoles } from '@enums'
 import { addFilter, FilterService, formatResponse, paginationResponse } from '@helpers'
 import { CreateUserRequest, FindUserResponse, NoContentResponse, UpdateUserRequest, User } from '@interfaces'
-import { Injectable, NotFoundException, Query, UnauthorizedException } from '@nestjs/common'
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  Query,
+  UnauthorizedException,
+} from '@nestjs/common'
 import { PrismaService } from '@prisma'
 import * as bcrypt from 'bcrypt'
 
@@ -228,6 +235,61 @@ export class UsersService {
     return {
       status: HttpStatus.NO_CONTENT,
     }
+  }
+
+  async update(data: UpdateUserRequest, userId: number) {
+    if (data.login.length > 15) {
+      throw new BadRequestException('Логин должен быть короче 15 символов!')
+    }
+
+    if (data.login.length < 8) {
+      throw new BadRequestException('Логин должен быть длиннее 8 символов!')
+    }
+
+    if (data.password.length > 12) {
+      throw new BadRequestException('Пароль должен быть короче 12 символов!')
+    }
+
+    if (data.password.length < 6) {
+      throw new BadRequestException('Пароль должен быть длиннее 6 символов!')
+    }
+
+    const userExists = await this.prisma.users.findFirst({
+      where: {
+        login: data.login,
+      },
+    })
+
+    if (userExists) {
+      throw new ConflictException('Этот логин уже используется!')
+    }
+
+    const hashedPassword = await bcrypt.hash(data.password, saltOrRounds)
+
+    const updatedUser = await this.prisma.users.update({
+      where: {
+        roleId: {
+          notIn: [UserRoles.COMPANY, UserRoles.BRANCH],
+        },
+        id: userId,
+      },
+      data: {
+        login: data.login,
+        password: hashedPassword,
+      },
+      select: {
+        id: true,
+        name: true,
+        role: {
+          select: {
+            name: true,
+            roleId: true,
+          },
+        },
+      },
+    })
+
+    return formatResponse(HttpStatus.OK, updatedUser)
   }
 
   async validate(data: any) {

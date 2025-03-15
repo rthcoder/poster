@@ -16,10 +16,6 @@ export class CreateUserDto implements CreateUserRequest {
 
   @IsNotEmpty()
   @IsNumber()
-  companyId: number
-
-  @IsNotEmpty()
-  @IsNumber()
   branchId: number
 
   @IsNotEmpty()

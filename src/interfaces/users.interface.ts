@@ -20,15 +20,11 @@ export interface CreateUserRequest {
   login: string
   password: string
   role: number
-  companyId: number
+  // companyId: number
   branchId: number
 }
 
 export interface UpdateUserRequest {
-  name?: string
   login?: string
   password?: string
-  role?: number
-  companyId?: number
-  branchId?: number
 }

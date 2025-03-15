@@ -14,6 +14,8 @@ export class RegionsService {
     const parsedSort = sort ? JSON?.parse(sort) : {}
     const parsedFilters = filters ? JSON?.parse(filters) : []
 
+    parsedFilters.push(addFilter('deletedAt', null, 'equals'))
+
     const regions: Region[] = await FilterService?.applyFilters(
       'region',
       parsedFilters,

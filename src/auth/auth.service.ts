@@ -16,6 +16,7 @@ export class AuthService {
   ) {}
 
   async login(data: LoginRequest): Promise<LoginResponse> {
+    let companyId: number
     const user = await this.usersService.validate({ login: data.login })
 
     const isMatch = await bcrypt.compare(data.password, user.password)
@@ -34,11 +35,16 @@ export class AuthService {
     //   throw new BadRequestException('Активный сеанс уже существует!')
     // }
 
+    if (user.role === UserRoles.COMPANY) {
+      companyId = user.id
+    }
+
     const accessToken = signJwt(
       {
         id: user?.id,
         login: user?.login,
         role: user.role,
+        companyId,
       },
       jwtConstants.accessSecret,
       60 * 60 * 24 * 15,
