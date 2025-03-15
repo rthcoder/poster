@@ -1,9 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards } from '@nestjs/common'
 import { CompaniesService } from './companies.service'
 import { CreateCompanyDto } from './dto/create-company.dto'
 import { UpdateCompanyDto } from './dto/update-company.dto'
 import { ApiTags } from '@nestjs/swagger'
 import { ApiVersion } from '@enums'
+import { CreateUserDto } from 'modules/users/dto'
+import { CustomRequest } from 'custom/request.custom'
+import { CheckTokenGuard } from '@guards'
 
 @ApiTags('Company Service')
 @Controller({
@@ -35,5 +38,11 @@ export class CompaniesController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.companiesService.remove(+id)
+  }
+
+  @UseGuards(CheckTokenGuard)
+  @Post(':id')
+  addStaff(@Body() data: CreateUserDto, @Req() request: CustomRequest) {
+    return this.companiesService.addStaff(data, request.user.companyId)
   }
 }

@@ -7,7 +7,7 @@ import { HttpStatus, UserRoles } from '@enums'
 import { formatResponse } from '@helpers'
 import * as bcrypt from 'bcrypt'
 import { saltOrRounds } from '@constants'
-import { CreateCompanyRequest, UpdateCompanyRequest } from '@interfaces'
+import { CreateCompanyRequest, CreateUserRequest, UpdateCompanyRequest } from '@interfaces'
 
 @Injectable()
 export class CompaniesService {
@@ -220,4 +220,82 @@ export class CompaniesService {
       status: HttpStatus.NO_CONTENT,
     }
   }
+
+  async addStaff(data: CreateUserRequest, companyId: number) {
+    if (data.login.length > 15) {
+      throw new BadRequestException('Логин должен быть короче 15 символов!')
+    }
+
+    if (data.login.length < 8) {
+      throw new BadRequestException('Логин должен быть длиннее 8 символов!')
+    }
+
+    if (data.password.length > 12) {
+      throw new BadRequestException('Пароль должен быть короче 12 символов!')
+    }
+
+    if (data.password.length < 6) {
+      throw new BadRequestException('Пароль должен быть длиннее 6 символов!')
+    }
+
+    const userExists = await this.prisma.users.findFirst({
+      where: {
+        login: data.login,
+      },
+    })
+
+    if (userExists) {
+      throw new ConflictException('Этот логин уже используется!')
+    }
+
+    const branchExists = await this.prisma.branch.findFirst({
+      where: {
+        id: data?.branchId,
+      },
+    })
+
+    if (branchExists) {
+      throw new ConflictException('Филиал не существует!')
+    }
+
+    const newUser = await this.prisma.users.create({
+      data: {
+        name: data.name,
+        login: data.login,
+        password: data.password,
+        branchId: data.branchId,
+        roleId: data.role,
+        companyId: companyId,
+      },
+      select: {
+        id: true,
+        name: true,
+        login: true,
+        branch: {
+          select: {
+            id: true,
+            name: true,
+            createdAt: true,
+          },
+        },
+        company: {
+          select: {
+            id: true,
+            name: true,
+            createdAt: true,
+          },
+        },
+        role: {
+          select: {
+            name: true,
+            roleId: true,
+          },
+        },
+        createdAt: true,
+      },
+    })
+    return formatResponse(HttpStatus.CREATED, newUser)
+  }
+
+  async getStaticStaff(companyId: number) {}
 }
